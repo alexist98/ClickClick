@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,10 +38,38 @@ class MainActivity : AppCompatActivity() {
         gameScoreTextView = findViewById<TextView>(R.id.game_score_text_view)
         timeLeftTextView = findViewById<TextView>(R.id.time_left_text_view)
         //gameScoreTextView.text=getString(R.string.sua_pontuacao,score.toString())
-        resetGame()
+        //resetGame()
 
+        if (savedInstanceState != null){
+            score = savedInstanceState.getInt(SCORE_KEY)
+            timeLeftOnTimer = savedInstanceState.getLong(TIME_LEFT_KEY)
+            restoreGame()
+        } else {
+            resetGame()
+        }
         tapMeButton.setOnClickListener{ view -> incrementScore()
         }
+    }
+
+    private fun restoreGame(){
+        gameScoreTextView.text = getString(R.string.sua_pontuacao, score.toString())
+        val restoredTime = timeLeftOnTimer/1000
+        timeLeftTextView.text=getString(R.string.time_left, restoredTime.toString())
+
+        countDownTimer= object : CountDownTimer(timeLeftOnTimer, countDownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                timeLeftOnTimer=millisUntilFinished
+                var timeLeft = millisUntilFinished/1000
+                timeLeftTextView.text=getString(R.string.time_left, timeLeft.toString())
+            }
+
+            override fun onFinish() {
+                endGame()
+            }
+        }
+        countDownTimer.start()
+        gameStarted=true
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
